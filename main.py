@@ -6,15 +6,26 @@ BACKGROUND_COLOR = "#B1DDC6"
 current_card = {}
 
 # -------------------------------- WORK WITH DATA ---------------------------------#
-data = pandas.read_csv("data/english_words.csv")
-words = data.to_dict(orient="records")
+try:
+    data = pandas.read_csv("data/words_to_learn.csv")
+except FileNotFoundError:
+    data = pandas.read_csv("data/english_words.csv")
+
+to_learn = data.to_dict(orient="records")
+
+
+def known_word():
+    to_learn.remove(current_card)
+    data_to_learn = pandas.DataFrame(to_learn)
+    data_to_learn.to_csv("data/words_to_learn.csv", index=False)
+    next_word()
 
 
 def next_word():
     global current_card, flipping_time
     window.after_cancel(flipping_time)
 
-    current_card = random.choice(words)
+    current_card = random.choice(to_learn)
     canvas.itemconfig(image, image=card_front)
     canvas.itemconfig(card_language, text="English", fill="black")
     canvas.itemconfig(card_word, text=current_card["English"], fill="black")
@@ -52,7 +63,7 @@ unknown_b.grid(row=1, column=0)
 
 r_button_img = PhotoImage(file="images/right.png")
 known_b = Button(image=r_button_img, highlightthickness=0, borderwidth=0, background=BACKGROUND_COLOR,
-                 command=next_word)
+                 command=known_word)
 known_b.grid(row=1, column=1)
 
 next_word()
